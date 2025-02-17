@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Virtual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #chat-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        #chat-form {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        #mensaje {
+            width: 70%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #respuesta {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: left;
+        }
+        #boton-voz {
+            margin-top: 10px;
+            background-color: #007bff;
+        }
+        #boton-voz:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h1>Asistente Virtual</h1>
+        <form id="chat-form">
+            <input type="text" id="mensaje" placeholder="Escribe tu mensaje" required>
+            <button type="submit">Enviar</button>
+        </form>
+        <button id="boton-voz">Hablar con el asistente</button>
+        <div id="respuesta"></div>
+        <audio id="audio-player" controls style="margin-top: 20px;"></audio>
+    </div>
+
+    <script>
+        // Función para enviar mensajes de texto
+        document.getElementById('chat-form').onsubmit = function(event) {
+            event.preventDefault();
+            var mensaje = document.getElementById('mensaje').value;
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({mensaje: mensaje}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('respuesta').innerText = data.respuesta;
+                // Reproducir el audio
+                var audioPlayer = document.getElementById('audio-player');
+                audioPlayer.src = data.audio_url;
+                audioPlayer.play();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('respuesta').innerText = "Hubo un error al procesar tu solicitud.";
+            });
+        };
+
+        // Función para manejar el chat de voz
+document.getElementById('boton-voz').onclick = function() {
+    fetch('/chat_voz', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('respuesta').innerText = data.respuesta;
+        // Reproducir el audio
+        var audioPlayer = document.getElementById('audio-player');
+        audioPlayer.src = data.audio_url;
+        audioPlayer.play();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('respuesta').innerText = "Hubo un error al procesar tu solicitud de voz.";
+    });
+};
+    </script>
+</body>
+</html>
